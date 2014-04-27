@@ -228,8 +228,8 @@
 \description
   \xreferences{fits_update_key}
 \notes
-  The data-type for the \exmp{value} argument must be an approriate type for
-  FITS keywords.  If \exmp{value} is a string, then the string will be
+  The data-type for the \exmp{value} argument must be an appropriate type
+  for FITS keywords.  If \exmp{value} is a string, then the string will be
   written as a cfitsio long-string using the
   \cfitsioxref{fits_update_key_longstr} function.  If \exmp{value} is \NULL,
   then the \cfitsioxref{fits_update_key_null} function will be called to
@@ -505,7 +505,7 @@
 
 \function{_fits_read_col}
 \synopsis{Read elements from a column}
-\usage{status = _fits_read_col (fptr, colnum, firstrow, numrows, array}
+\usage{status = _fits_read_col (fptr, colnum, firstrow, numrows, array)}
 #v+
    Fits_File_Type fptr;
    Int_Type colnum, firstrow, numrows;

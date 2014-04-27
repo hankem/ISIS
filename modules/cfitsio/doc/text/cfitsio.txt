@@ -2663,7 +2663,7 @@
         information.
 
       Notes
-        The data-type for the value argument must be an approriate type
+        The data-type for the value argument must be an appropriate type
         for FITS keywords. If value is a string, then the string will be
         written as a cfitsio long-string using the
         fits_update_key_longstr function. If value is NULL, then the
@@ -3129,7 +3129,7 @@
         Read elements from a column
 
       Usage
-        status = _fits_read_col (fptr, colnum, firstrow, numrows, array
+        status = _fits_read_col (fptr, colnum, firstrow, numrows, array)
 
 
              Fits_File_Type fptr;

@@ -377,8 +377,8 @@ _fits_update_key
   See its documentation for additional information.
 
  NOTES
-  The data-type for the `value' argument must be an approriate type for
-  FITS keywords.  If `value' is a string, then the string will be
+  The data-type for the `value' argument must be an appropriate type
+  for FITS keywords.  If `value' is a string, then the string will be
   written as a cfitsio long-string using the
   fits_update_key_longstr function.  If `value' is NULL,
   then the fits_update_key_null function will be called to
@@ -819,7 +819,7 @@ _fits_read_col
   Read elements from a column
 
  USAGE
-  status = _fits_read_col (fptr, colnum, firstrow, numrows, array
+  status = _fits_read_col (fptr, colnum, firstrow, numrows, array)
 
    Fits_File_Type fptr;
    Int_Type colnum, firstrow, numrows;

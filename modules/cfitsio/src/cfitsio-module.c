@@ -49,7 +49,7 @@ SLANG_MODULE(cfitsio);
 
 /* This is a hack that works for all 32 and 64 bit systems that I know */
 /* The CFITSIO_INT*_TYPE objects must refer to the corresponding C type
- * and have the approriate length.
+ * and have the appropriate length.
  */
 #if SIZEOF_SHORT == 2
 # define SLANG_UINT16_TYPE SLANG_USHORT_TYPE
