@@ -231,6 +231,7 @@ AC_CONFIG_FILES([\
  modules/Makefile \
  modules/cfitsio/Makefile:modules/cfitsio/autoconf/Makefile.in \
  modules/cfitsio/src/Makefile:modules/cfitsio/src/Makefile.in \
+ modules/cfitsio/src/tests/Makefile:modules/cfitsio/src/tests/Makefile.in \
  modules/pgplot/Makefile:modules/pgplot/autoconf/Makefile.in \
  modules/pgplot/src/Makefile:modules/pgplot/src/Makefile.in \
  modules/xspec/Makefile:modules/xspec/autoconf/Makefile.in \

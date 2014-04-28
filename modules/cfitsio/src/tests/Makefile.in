@@ -1,0 +1,25 @@
+# -*- make -*-
+
+TEST1 = test_bit-valued_columns
+
+CC		= @CC@
+
+CFITSIO_INC	= @CFITSIO_INC@
+CFITSIO_LIB	= @CFITSIO_LIB@ -lcfitsio
+
+RPATH		= @RPATH@
+LIBS		= $(CFITSIO_LIB) $(RPATH) -lm
+INCS		= $(CFITSIO_INC)
+
+all: $(TEST1).fits
+
+$(TEST1).fits: $(TEST1)
+	./$(TEST1)
+
+$(TEST1): $(TEST1).c
+	$(CC) $(INCS) $(TEST1).c -o $(TEST1) $(LIBS)
+
+clean:
+	-/bin/rm -f $(TEST1) $(TEST1).fits *~ \#*
+distclean: clean
+	-/bin/rm -f Makefile

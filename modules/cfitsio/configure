@@ -5779,7 +5779,7 @@ CFLAGS="$CFLAGS $IEEE_CFLAGS"
 
 ac_config_headers="$ac_config_headers src/config.h:src/config.hin"
 
-ac_config_files="$ac_config_files Makefile:autoconf/Makefile.in src/Makefile"
+ac_config_files="$ac_config_files Makefile:autoconf/Makefile.in src/Makefile src/tests/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -6474,6 +6474,7 @@ do
     "src/config.h") CONFIG_HEADERS="$CONFIG_HEADERS src/config.h:src/config.hin" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile:autoconf/Makefile.in" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
+    "src/tests/Makefile") CONFIG_FILES="$CONFIG_FILES src/tests/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

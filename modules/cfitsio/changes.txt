@@ -29,3 +29,5 @@ Changes since 0.4.6
     then that value will be written as a fits logical keyword value.
 15. configure: Parse /etc/ld.so.conf to find additional system lib
     directories.
+16. src/cfitsio-module.c: FITS bit-valued columns stored in 3 bytes
+    per element can be read into S-Lang Int32_Type arrays.

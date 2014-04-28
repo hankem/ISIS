@@ -89,7 +89,7 @@ static SLtype Fits_Type_Id = 0;
  * TLONG always specifies a 32 bit integer, but for a keyword is simply means
  * a long integer.
  */
-static int map_fitsio_type_to_slang (int *typep, long *repeat, SLtype *stype)
+static int map_fitsio_type_to_slang (int *typep, long *repeat, int *bytes_per_elem, SLtype *stype)
 {
    int type = *typep;
    int sgn = (type < 0) ? -1 : 1;
@@ -156,18 +156,28 @@ static int map_fitsio_type_to_slang (int *typep, long *repeat, SLtype *stype)
 	if (*repeat <= 8)
 	  {
 	     *repeat = 1;
+	     *bytes_per_elem = 1;
 	     *stype = SLANG_CHAR_TYPE;
 	     break;
 	  }
 	if (*repeat <= 16)
 	  {
 	     *repeat = 1;
+	     *bytes_per_elem = 2;
 	     *stype = SLANG_INT16_TYPE;
+	     break;
+	  }
+	if (*repeat <= 24)
+	  {
+	     *repeat = 1;
+	     *bytes_per_elem = 3;
+	     *stype = SLANG_INT32_TYPE;
 	     break;
 	  }
 	if (*repeat <= 32)
 	  {
 	     *repeat = 1;
+	     *bytes_per_elem = 4;
 	     *stype = SLANG_INT32_TYPE;
 	     break;
 	  }
@@ -1277,11 +1287,10 @@ static int get_num_cols (FitsFile_Type *ft, SLang_Ref_Type *ref)
    return status;
 }
 
-static void byte_swap32 (unsigned char *ss, unsigned int n)
+static void byte_swap32 (unsigned char *p, unsigned int n)
 {
-   unsigned char *p, *pmax, ch;
+   unsigned char *pmax, ch;
 
-   p = (unsigned char *) ss;
    pmax = p + 4 * n;
    while (p < pmax)
      {
@@ -1679,6 +1688,25 @@ static int read_bit_column (fitsfile *f, unsigned int col, unsigned int row,
 			   NULL, data, &anynul, &status))
      return status;
 
+   if (bytes_per_elem == 3)
+     {
+	/* The FITS bit-column stored in 3 bytes per element
+	 * has been read into an S-Lang array of a 4-byte data type,
+	 * whose bytes therefore need to be redistributed in the following:
+	 * (d[4i], d[4i+1], d[4i+2], d[4i+3]) = (d[3i], d[3i+1], d[3+2], 0);
+	 */
+	unsigned char *src = data + 3*num_elements - 1;
+	unsigned char *dst = data + 4*num_elements - 1;
+	SLuindex_Type i;
+	for (i = 0;  i < num_elements;  i++)
+	  {
+	     *dst-- = 0;       /* data[4*i+3] = 0;          */
+	     *dst-- = *src--;  /* data[4*i+2] = data[3*i+2]; */
+	     *dst-- = *src--;  /* data[4*i+1] = data[3*i+1]; */
+	     *dst-- = *src--;  /* data[4*i  ] = data[3*i  ]; */
+	  }
+     }
+
    s = 0x1234;
    if (*(unsigned char *) &s == 0x12)
      return status;
@@ -1709,6 +1737,9 @@ static int read_bit_column (fitsfile *f, unsigned int col, unsigned int row,
 	  }
 	break;
 
+      case 3:
+	bytes_per_elem = 4;  /* to calculate the bit-shift, bytes_per_elem is the size of the S-Lang data type */
+	/* drop */
       case 4:
 	byte_swap32 (data, num_elements);
 	shift = 8*bytes_per_elem - bits_per_elem;
@@ -1830,7 +1861,7 @@ static int read_col (FitsFile_Type *ft, int *colnum, int *firstrowp,
 		     int *num_rowsp, SLang_Ref_Type *ref)
 {
    SLang_Array_Type *at;
-   int type;
+   int type, bytes_per_elem;
    long num_rows;
    long width;
    int status;
@@ -1879,7 +1910,7 @@ static int read_col (FitsFile_Type *ft, int *colnum, int *firstrowp,
      return status;
 
    save_repeat = repeat;
-   if (-1 == map_fitsio_type_to_slang (&type, &repeat, &datatype))
+   if (-1 == map_fitsio_type_to_slang (&type, &repeat, &bytes_per_elem, &datatype))
      return -1;
 
    if (datatype == SLANG_STRING_TYPE)
@@ -1925,6 +1956,7 @@ typedef struct
    int type;
    long repeat, width;
    long repeat_orig;		       /* used for tbit columns */
+   int bytes_per_elem;		       /* used for tbit columns */
    SLtype datatype;
    unsigned int data_offset;
 }
@@ -2070,7 +2102,7 @@ static int read_cols (void)
 	SLang_Array_Type *at;
 	SLtype datatype;
 	long repeat;
-	int type;
+	int type, bytes_per_elem;
 	int col;
 
 	col = cols[i];
@@ -2085,13 +2117,14 @@ static int read_cols (void)
 	  goto free_and_return_status;
 
 	ci[i].repeat_orig = repeat;
-	if (-1 == map_fitsio_type_to_slang (&type, &repeat, &datatype))
+	if (-1 == map_fitsio_type_to_slang (&type, &repeat, &bytes_per_elem, &datatype))
 	  {
 	     status = -1;
 	     goto free_and_return_status;
 	  }
 	ci[i].repeat = repeat;
 	ci[i].type = type;
+	ci[i].bytes_per_elem = bytes_per_elem;
 	ci[i].datatype = datatype;
 	ci[i].data_offset = 0;
 
@@ -2186,10 +2219,9 @@ static int read_cols (void)
 	       {
 		  unsigned int num_elements = repeat * delta_rows;
 		  unsigned char *data = (unsigned char *)at->data + data_offset;
-		  /* int anynul; */
 
 		  if (type == TBIT)
-		    status = read_bit_column (f, col, firstrow, 1, num_elements, data, at->sizeof_type, ci[i].repeat_orig);
+		    status = read_bit_column (f, col, firstrow, 1, num_elements, data, ci[i].bytes_per_elem, ci[i].repeat_orig);
 		  else
 		    (void) fits_read_col (f, type, col, firstrow, 1, num_elements, NULL,
 					  data, NULL, &status);

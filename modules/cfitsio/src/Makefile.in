@@ -1,4 +1,4 @@
-# -*- sh -*-
+# -*- make -*-
 
 #---------------------------------------------------------------------------
 # List of modules and associated .sl files to install
@@ -81,7 +81,8 @@ cfitsio.h: Makefile
 #---------------------------------------------------------------------------
 # Regression tests
 #---------------------------------------------------------------------------
-test:
+test: cfitsio-module.so
+	cd tests; $(MAKE) all
 	@for X in tests/test_*.sl; \
 	do \
 		slsh $$X; \
@@ -131,6 +132,8 @@ install_hlpfiles:
 install: all install_directories install_modules install_slfiles install_hlpfiles
 
 clean:
+	cd tests; $(MAKE) clean
 	-/bin/rm -f $(MODULES) *~ \#*
 distclean: clean
+	cd tests; $(MAKE) distclean
 	-/bin/rm -f config.h cfitsio.h Makefile $(MODULES) *.fit
