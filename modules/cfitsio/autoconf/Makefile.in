@@ -1,5 +1,4 @@
-# -*- sh -*-
-
+# -*- make -*-
 @SET_MAKE@
 SHELL = /bin/sh
 
@@ -17,6 +16,7 @@ clean:
 	/bin/rm -f *~ \#*
 	cd src; $(MAKE) clean
 distclean: clean
+	/bin/rm -f Makefile config.status config.log
 	cd src; $(MAKE) distclean
 install:
 	cd src; $(MAKE) install

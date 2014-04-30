@@ -524,10 +524,16 @@
   given by the repeat value associated with the column.  For a
   variable length column, where data are stored in the heap of the
   HDU, the data will be read as a 1-d array of \exmp{numrows} arrays.
-  
+
   If the column is a bit-valued column, then data will be returned as
-  an array of integers of the appropriate size.  Currently only 8X,
-  16X, and 32X bit columns are supported.
+  an array of integers of the appropriate size:  1X -- 8X bit columns
+  will yield \var{Char_Type} arrays,  9X -- 16X columns give \var{Int16_Type},
+  and 17X -- 32X columns \var{Int32_Type}, respectively. Larger columns
+  are currently not supported.
+  Note that for bit-columns other than 8X, 16X, or 32X, some bits
+  of the resulting integer values are unspecified.  For example,
+  the values 0b011111111 and 0b100000000 of a 9X FITS column may
+  actually be read as 0b0000000011111111 and 0b1111111100000000.
 \seealso{_fits_read_cols, _fits_write_col}
 \done
 

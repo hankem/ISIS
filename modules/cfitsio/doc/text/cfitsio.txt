@@ -1,6 +1,6 @@
   S-Lang CFITSIO Module Reference
   John E. Davis, davis@space.mit.edu
-  Oct 27, 2010
+  Apr 30, 2014
   ____________________________________________________________
 
   Table of Contents
@@ -480,7 +480,6 @@
 
   The fits_read_cell function may be used to read a single cell in the
   table. For example
-
 
 
      phas = fits_read_cell ("foo.fits[EXAMPLE]", "phas", 4);
@@ -1167,7 +1166,6 @@
         either be strings denoting the column names, or integers
         representing the column numbers.
 
-
       Qualifiers
         ; casesen: use case-sensitive column names
 
@@ -1238,7 +1236,7 @@
         Read a row from a FITS binary table
 
       Usage
-        Struct_Type fits_read_cell (file, r)
+        Struct_Type fits_read_row (file, r)
 
 
              Fits_File_Type or String_Type file;
@@ -1485,7 +1483,6 @@
         records. As the example shows, this function places the comment
         and history records at the end of the table.
 
-
       See Also
         ``fits_create_binary_table'', ``fits_open_file''
 
@@ -1613,6 +1610,7 @@
 
       Synopsis
         Compute and write the DATASUM and CHECKSUM keywords
+
       Usage
         fits_write_chksum (fd)
 
@@ -1674,7 +1672,6 @@
         ``fits_write_records'', ``fits_read_key''
 
   2.7.27.  fits_write_records
-
 
 
       Synopsis
@@ -1739,7 +1736,6 @@
         specified image array. The array must be an integer or floating
         point type, otherwise and error will be generated. The bitpix
         value is returned.
-
 
       See Also
         ``fits_write_image_hdu'', ``fits_read_img''
@@ -2060,12 +2056,11 @@
         corresponding WCS:
 
 
-
-         (x,y) = fits_read_col ("table.fits", "X", "Y");
-         gridx = [min(x):max(x):0.5];
-         gridy = [min(y):max(y):0.5];
-         img = hist2d (y,x,gridy,gridx);
-         wcs = fitswcs_new_img_wcs (gridy, gridx);
+              (x,y) = fits_read_col ("table.fits", "X", "Y");
+              gridx = [min(x):max(x):0.5];
+              gridy = [min(y):max(y):0.5];
+              img = hist2d (y,x,gridy,gridx);
+              wcs = fitswcs_new_img_wcs (gridy, gridx);
 
 
 
@@ -2475,6 +2470,7 @@
              _FITS_BINARY_TBL
 
 
+
   3.2.12.  _fits_copy_file
 
 
@@ -2604,6 +2600,7 @@
 
       Usage
         status = _fits_read_img (Fits_File_Type fptr, Ref_Type img)
+
       Description
         This function is a wrapper around the cfitsio library function
         fits_read_img. See its documentation for additional information.
@@ -3153,8 +3150,14 @@
         will be read as a 1-d array of numrows arrays.
 
         If the column is a bit-valued column, then data will be returned
-        as an array of integers of the appropriate size. Currently only
-        8X, 16X, and 32X bit columns are supported.
+        as an array of integers of the appropriate size: 1X -- 8X bit
+        columns will yield Char_Type arrays, 9X -- 16X columns give
+        Int16_Type, and 17X -- 32X columns Int32_Type, respectively.
+        Larger columns are currently not supported.  Note that for bit-
+        columns other than 8X, 16X, or 32X, some bits of the resulting
+        integer values are unspecified. For example, the values
+        0b011111111 and 0b100000000 of a 9X FITS column may actually be
+        read as 0b0000000011111111 and 0b1111111100000000.
 
       See Also
         ``_fits_read_cols'', ``_fits_write_col''
@@ -3245,6 +3248,7 @@
         This function is a wrapper around the cfitsio library function
         fits_write_chksum. See its documentation for additional
         information.
+
   3.2.48.  _fits_update_chksum
 
 
@@ -3307,7 +3311,6 @@
 
       Usage
         Float_Type _fits_get_version ()
-
 
       Description
         This function is a wrapper around the cfitsio library function

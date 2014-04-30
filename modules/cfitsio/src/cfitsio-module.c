@@ -1693,18 +1693,19 @@ static int read_bit_column (fitsfile *f, unsigned int col, unsigned int row,
 	/* The FITS bit-column stored in 3 bytes per element
 	 * has been read into an S-Lang array of a 4-byte data type,
 	 * whose bytes therefore need to be redistributed in the following:
-	 * (d[4i], d[4i+1], d[4i+2], d[4i+3]) = (d[3i], d[3i+1], d[3+2], 0);
+	 * (d[4i], d[4i+1], d[4i+2], d[4i+3]) = (d[3i], d[3i+1], d[3i+2], 0);
 	 */
 	unsigned char *src = data + 3*num_elements - 1;
 	unsigned char *dst = data + 4*num_elements - 1;
-	SLuindex_Type i;
-	for (i = 0;  i < num_elements;  i++)
+	SLuindex_Type i = num_elements;
+	do
 	  {
+	     i--;
 	     *dst-- = 0;       /* data[4*i+3] = 0;          */
 	     *dst-- = *src--;  /* data[4*i+2] = data[3*i+2]; */
 	     *dst-- = *src--;  /* data[4*i+1] = data[3*i+1]; */
 	     *dst-- = *src--;  /* data[4*i  ] = data[3*i  ]; */
-	  }
+	  } while (i > 0);
      }
 
    s = 0x1234;
